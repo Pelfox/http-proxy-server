@@ -1,0 +1,67 @@
+name: "Build Artifacts"
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact: http-proxy-server-linux
+            binary: build/http-proxy-server
+          - os: macos-latest
+            artifact: http-proxy-server-macos
+            binary: build/http-proxy-server
+          - os: windows-latest
+            artifact: http-proxy-server-windows
+            binary: build/Release/http-proxy-server.exe
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+
+      - name: "Configure project"
+        run: cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+
+      - name: "Build"
+        run: cmake --build build --config Release
+
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.binary }}
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: "Download artifacts"
+        uses: actions/download-artifact@v4
+
+      - name: "Prepare release files"
+        run: |
+          mv http-proxy-server-linux/http-proxy-server http-proxy-server-linux
+          mv http-proxy-server-macos/http-proxy-server http-proxy-server-macos
+          mv http-proxy-server-windows/http-proxy-server.exe http-proxy-server-windows.exe
+
+      - name: "Publish release"
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            http-proxy-server-linux
+            http-proxy-server-macos
+            http-proxy-server-windows.exe
