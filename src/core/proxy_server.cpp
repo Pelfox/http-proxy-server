@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-ProxyServer::ProxyServer(uint16_t port)
-    : port(port), cache(100, 300), filter(), logger(std::cout) {}
+ProxyServer::ProxyServer(uint16_t port, const std::string &filterConfigPath)
+    : port(port), cache(100, 300), filter(filterConfigPath), logger(std::cout) {}
 
 void ProxyServer::start()
 {

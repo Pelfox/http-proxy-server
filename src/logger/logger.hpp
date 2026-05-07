@@ -2,6 +2,7 @@
 
 #include <ostream>
 #include <string>
+#include <string_view>
 
 /**
  * @brief Уровень важности логируемого сообщения.
@@ -53,7 +54,7 @@ private:
      *
      * @param level Уровень логирования для преобразования.
      */
-    static std::string levelToString(LogLevel level);
+    static std::string_view levelToString(LogLevel level);
 
     std::ostream &pipe;
 };

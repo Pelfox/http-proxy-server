@@ -7,11 +7,18 @@
 #include "http/http_response.hpp"
 
 #include <cstdint>
+#include <string>
 
 class ProxyServer
 {
 public:
-    explicit ProxyServer(uint16_t port);
+    /**
+     * @brief Создаёт прокси-сервер и загружает правила фильтрации.
+     *
+     * @param port Порт, на котором сервер будет принимать подключения.
+     * @param filterConfigPath Путь к JSON-файлу с правилами фильтрации.
+     */
+    ProxyServer(uint16_t port, const std::string &filterConfigPath);
 
     void start();
     void stop();

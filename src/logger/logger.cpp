@@ -31,7 +31,7 @@ std::string Logger::formatTimestamp()
     return timestamp.str();
 }
 
-std::string Logger::levelToString(LogLevel level)
+std::string_view Logger::levelToString(LogLevel level)
 {
     switch (level)
     {
