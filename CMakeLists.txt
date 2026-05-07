@@ -23,6 +23,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 enable_testing()
 
 add_executable(${PROJECT_NAME}-tests
+    tests/cache_tests.cpp
     tests/filter_tests.cpp
     tests/http_tests.cpp
     tests/proxy_server_tests.cpp

@@ -5,6 +5,7 @@
 
 #include <algorithm>
 #include <array>
+#include <chrono>
 #include <iostream>
 #include <memory>
 #include <stdexcept>
@@ -322,6 +323,34 @@ namespace
     }
 
     /**
+     * @brief Читает ответ target-сервера до закрытия соединения.
+     *
+     * Прокси принудительно устанавливает "Connection: close" в переадресуемом
+     * запросе, поэтому конечный сервер закроет соединение по окончании ответа.
+     * Эта функция собирает все байты ответа в буфер, чтобы их можно было
+     * одновременно отправить клиенту и сохранить в кэш.
+     */
+    std::vector<uint8_t> readResponseUntilClose(int socket)
+    {
+        std::vector<uint8_t> data;
+        std::array<char, BufferSize> buffer{};
+
+        while (true)
+        {
+            const auto received = recv(socket, buffer.data(), buffer.size(), 0);
+            if (received <= 0)
+            {
+                break;
+            }
+            data.insert(data.end(),
+                        reinterpret_cast<const uint8_t *>(buffer.data()),
+                        reinterpret_cast<const uint8_t *>(buffer.data()) + received);
+        }
+
+        return data;
+    }
+
+    /**
      * @brief Прокидывает байты в обе стороны для HTTPS CONNECT.
      *
      * После ответа "200 Connection Established" прокси больше не понимает
@@ -366,7 +395,7 @@ namespace
 }
 
 ProxyServer::ProxyServer(uint16_t port, const std::string &filterConfigPath)
-    : port(port), cache(100, 300), filter(filterConfigPath), logger(std::cout) {}
+    : port(port), cache(100, std::chrono::seconds(300)), filter(filterConfigPath), logger(std::cout) {}
 
 void ProxyServer::start()
 {
@@ -456,6 +485,17 @@ void ProxyServer::processRequest(int clientSocket, HttpRequest request)
         return;
     }
 
+    const bool cacheable = request.method == "GET";
+    if (cacheable)
+    {
+        if (auto cached = cache.get(target.filterUrl))
+        {
+            logger.write(LogLevel::Info, "Cache hit: " + target.filterUrl);
+            sendResponse(clientSocket, cached->response);
+            return;
+        }
+    }
+
     FileDescriptor targetSocket = connectToTarget(target.host, target.port);
     const std::string forwardRequest = buildForwardRequest(request, target);
     if (!sendAll(targetSocket.get(), forwardRequest))
@@ -463,5 +503,29 @@ void ProxyServer::processRequest(int clientSocket, HttpRequest request)
         throw std::runtime_error("Unable to forward HTTP request to target.");
     }
 
-    relayResponse(targetSocket.get(), clientSocket);
+    if (!cacheable)
+    {
+        relayResponse(targetSocket.get(), clientSocket);
+        return;
+    }
+
+    // Кэшируем только успешные GET-ответы. Если парсинг не удался или код
+    // не 200, просто отдаём ответ клиенту без сохранения.
+    const auto rawResponse = readResponseUntilClose(targetSocket.get());
+    sendAll(clientSocket, rawResponse);
+
+    try
+    {
+        HttpResponse response;
+        response.parse(rawResponse);
+        if (response.statusCode == 200)
+        {
+            cache.put(target.filterUrl, response);
+            logger.write(LogLevel::Info, "Cache stored: " + target.filterUrl);
+        }
+    }
+    catch (const std::exception &error)
+    {
+        logger.write(LogLevel::Debug, std::string("Skip caching: ") + error.what());
+    }
 }

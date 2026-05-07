@@ -570,8 +570,6 @@ TEST_CASE("ProxyServer handles concurrent requests in parallel", "[proxy]")
 
     CHECK(target.connectionCount() == RequestCount);
     CHECK(processed.load() == RequestCount);
-    // Если обработка была последовательной, ушло бы >= 250мс. Параллельная
-    // - заметно быстрее, держим порог консервативно.
     CHECK(elapsed < 200ms);
 }
 
