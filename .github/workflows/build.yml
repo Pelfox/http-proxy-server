@@ -19,9 +19,6 @@ jobs:
           - os: macos-latest
             artifact: http-proxy-server-macos
             binary: build/http-proxy-server
-          - os: windows-latest
-            artifact: http-proxy-server-windows
-            binary: build/Release/http-proxy-server.exe
 
     runs-on: ${{ matrix.os }}
 
