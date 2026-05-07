@@ -24,6 +24,8 @@ enable_testing()
 
 add_executable(${PROJECT_NAME}-tests
     tests/filter_tests.cpp
+    tests/http_tests.cpp
+    tests/proxy_server_tests.cpp
     tests/vendor/catch_amalgamated.cpp
     ${SOURCES}
     ${HEADERS}

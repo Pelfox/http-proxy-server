@@ -4,7 +4,6 @@
 #include "filter/filter.hpp"
 #include "logger/logger.hpp"
 #include "http/http_request.hpp"
-#include "http/http_response.hpp"
 
 #include <cstdint>
 #include <string>
@@ -21,10 +20,10 @@ public:
     ProxyServer(uint16_t port, const std::string &filterConfigPath);
 
     void start();
-    void stop();
-    HttpResponse handleRequest(const HttpRequest &request);
 
 private:
+    void processRequest(int clientSocket, HttpRequest request);
+
     uint16_t port;
     Cache cache;
     Filter filter;
