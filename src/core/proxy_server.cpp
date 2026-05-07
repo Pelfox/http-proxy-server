@@ -3,7 +3,7 @@
 #include <iostream>
 
 ProxyServer::ProxyServer(uint16_t port)
-    : port(port), cache(100, 300), filter(), logger(std::cerr) {}
+    : port(port), cache(100, 300), filter(), logger(std::cout) {}
 
 void ProxyServer::start()
 {
