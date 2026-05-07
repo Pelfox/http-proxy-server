@@ -15,10 +15,10 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact: http-proxy-server-linux
-            binary: build/http-proxy-server
+            binary: build/http-proxy-server-linux
           - os: macos-latest
             artifact: http-proxy-server-macos
-            binary: build/http-proxy-server
+            binary: build/http-proxy-server-darwin
 
     runs-on: ${{ matrix.os }}
 
@@ -51,14 +51,12 @@ jobs:
 
       - name: "Prepare release files"
         run: |
-          mv http-proxy-server-linux/http-proxy-server http-proxy-server-linux
-          mv http-proxy-server-macos/http-proxy-server http-proxy-server-macos
-          mv http-proxy-server-windows/http-proxy-server.exe http-proxy-server-windows.exe
+          mv http-proxy-server-linux/http-proxy-server-linux .
+          mv http-proxy-server-macos/http-proxy-server-darwin .
 
       - name: "Publish release"
         uses: softprops/action-gh-release@v2
         with:
           files: |
             http-proxy-server-linux
-            http-proxy-server-macos
-            http-proxy-server-windows.exe
+            http-proxy-server-darwin
