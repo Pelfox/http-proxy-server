@@ -22,7 +22,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE include)
 
 enable_testing()
 
-add_executable(${PROJECT_NAME}-tests
+add_executable(tests
     tests/cache_tests.cpp
     tests/filter_tests.cpp
     tests/http_tests.cpp
@@ -32,6 +32,6 @@ add_executable(${PROJECT_NAME}-tests
     ${HEADERS}
 )
 
-target_include_directories(${PROJECT_NAME}-tests PRIVATE src include include/catch2)
+target_include_directories(tests PRIVATE src include include/catch2)
 
-add_test(NAME ${PROJECT_NAME}-tests COMMAND ${PROJECT_NAME}-tests)
+add_test(NAME tests COMMAND tests)

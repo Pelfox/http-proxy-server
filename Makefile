@@ -5,6 +5,9 @@ all: build
 build: $(BUILD_DIR)/Makefile
 	@cmake --build $(BUILD_DIR)
 
+build-tests: $(BUILD_DIR)/Makefile
+	@cmake --build $(BUILD_DIR) --target tests
+
 $(BUILD_DIR)/Makefile:
 	@cmake -B $(BUILD_DIR) -S .
 
@@ -13,7 +16,7 @@ clean:
 
 rebuild: clean build
 
-test: build
-	@ctest --test-dir $(BUILD_DIR) --output-on-failure
+test: build-tests
+	@$(BUILD_DIR)/tests
 
-.PHONY: all build clean rebuild test
+.PHONY: all build build-tests clean rebuild test
