@@ -36,5 +36,12 @@ make
 2. Запустите сервер:
 
 ```bash
-./build/http-proxy-server
+./build/http-proxy-server --port 8080 --filter filter.example.json
+```
+
+Параметры запуска:
+
+```bash
+./build/http-proxy-server --help
+./build/http-proxy-server --port 3128 --filter filter.example.json
 ```

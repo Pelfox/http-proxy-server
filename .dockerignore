@@ -1,0 +1,7 @@
+.git
+.gradle-home
+build
+cmake-build-*
+Dockerfile
+README.md
+.DS_Store
